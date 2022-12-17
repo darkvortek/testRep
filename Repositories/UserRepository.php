@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Repositories;
+namespace Repositories;
 
 class UserRepository
 {

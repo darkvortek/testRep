@@ -1,69 +1,52 @@
 <?php
-require_once 'Interfaces/notificationInterface.php';
-require_once 'Notifications/notificationManager.php';
-require_once 'Notifications/abstractNotification.php';
-require_once 'Notifications/emailNotification.php';
-require_once 'Notifications/pushNotification.php';
-require_once 'Repositories/user.php';
-require_once 'Dto/userDto.php';
-require_once 'Validators/baseValidator.php';
-require_once 'Validators/notificationValidator.php';
+/**
+Именование файлов.
+PSR-4 не будет поддерживаться.
+https://github.com/darkvortek/testRep/blob/main/index.php#L2
+Клиентский код реализован внутри класс Newsletter.
+https://github.com/darkvortek/testRep/blob/main/index.php#L17
+Нарушен принцип единственной ответственности.
+https://github.com/darkvortek/testRep/blob/main/index.php#L63
+https://github.com/darkvortek/testRep/blob/main/index.php#L27
+https://github.com/darkvortek/testRep/blob/main/index.php#L39
+Зависимости создаются не при инициализации объекта класса.
+https://github.com/darkvortek/testRep/blob/main/index.php#L23
+"Магическое" определение класса.
+Нет указание типов свойств класса.
+https://github.com/darkvortek/testRep/blob/main/Dto/userDto.php#L23
+Наследование выбрано не оптимально. Инкапсулирует структуру данных ввиде (recipient, message, additional)
+https://github.com/darkvortek/testRep/blob/main/Notifications/abstractNotification.php#L7
+Результат передается в стандартный поток вывода.
+Класс содержит свойства, которые не используются.
+https://github.com/darkvortek/testRep/blob/main/Notifications/emailNotification.php#L10
+Ничем не отличается от EmailNotification.
+https://github.com/darkvortek/testRep/blob/main/Notifications/pushNotification.php#L10
+Нарушен принцип открытости/закрытости класса.
+https://github.com/darkvortek/testRep/blob/main/Notifications/notificationManager.php#L9
+Изменение внутреннего состояния объекта не безопастно.
+https://github.com/darkvortek/testRep/blob/main/Notifications/notificationManager.php#L19
+Нарушен принцип единственной ответственности.
+https://github.com/darkvortek/testRep/blob/main/Validators/notificationValidator.php#L5
+Материалы:
+https://habr.com/ru/post/280071/
+https://habr.com/ru/post/309858/
+https://habr.com/ru/company/avito/blog/335584/
+https://habr.com/ru/post/422507/
+https://habr.com/ru/post/489426/
+https://habr.com/ru/post/526220/
+https://habr.com/ru/company/otus/blog/567710/
+https://habr.com/ru/post/463125/
+https://habr.com/ru/company/ruvds/blog/426413/
+https://habr.com/ru/post/92570/
+ */
 
-use Test\Dto\UserDto;
-use Test\Notifications\NotificationManager;
-use Test\Repositories\UserRepository;
-use Test\Validators\NotificationValidator;
+define( 'APP_DIR', __DIR__ );
+define( 'TEMPLATE_DIR', APP_DIR . DIRECTORY_SEPARATOR . 'Templates' );
 
-class Newsletter
-{
-    public function send(): void
-    {
-        $usersData = $this->getUsers();
+require_once 'helpers.php';
+require_once 'autoloader.php';
 
-        $validator = new NotificationValidator();
-        $manager = new NotificationManager();
+$user_repository = new \Repositories\UserRepository();
 
-        foreach ($usersData as $userData) {
-            $userData = UserDto::createFromArray($userData);
-
-            if (!$validator->validateName($userData->name)) {
-                continue;
-            }
-
-            if ($validator->validateDeviceId($userData->device_id)) {
-                $manager
-                    ->toPush()
-                    ->setRecipient($userData->device_id)
-                    ->setMessage(
-                        sprintf(
-                            "Push notification has been sent to user %s with device_id %s\n\r",
-                            $userData->name,
-                            $userData->device_id
-                        ))
-                    ->send();
-            }
-
-            if ($validator->validateEmail($userData->email)) {
-                $manager
-                    ->toEmail()
-                    ->setRecipient($userData->email)
-                    ->setMessage(
-                        sprintf(
-                            "Email %s has been sent to user %s\n\r",
-                            $userData->email,
-                            $userData->name
-                        ))
-                    ->send();
-            }
-        }
-    }
-
-    protected function getUsers() : array
-    {
-        $userRepository = new UserRepository();
-        return $userRepository->getUsers();
-    }
-}
-
-$newsletter = new Newsletter();
-$newsletter->send();
+$command = new \Commands\SendUserNotification($user_repository);
+$command->process();
