@@ -9,7 +9,7 @@ use Interfaces\NotificationInterface;
 class EmailNotification implements NotificationInterface
 {
 
-    protected UserDto $userDto;
+    protected EmailDto $emailDto;
 
     protected string $from;
 
@@ -19,7 +19,7 @@ class EmailNotification implements NotificationInterface
 
     public function __construct(EmailDto $emailDto)
     {
-        $this->userDto = $emailDto->userDto;
+        $this->emailDto = $emailDto;
         $this->from = $emailDto->from;
         $this->recipient = $emailDto->recipient;
         $this->message = $emailDto->message;
@@ -29,7 +29,7 @@ class EmailNotification implements NotificationInterface
     {
         /*
          * some code for send email like a
-         * mail($this->getFrom(), $this->getRecipient(), $this->getMessage())
+         * mail($this->from, $this->recipient, $this->message)
          */
 
         return true;

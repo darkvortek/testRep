@@ -46,7 +46,37 @@ define( 'TEMPLATE_DIR', APP_DIR . DIRECTORY_SEPARATOR . 'Templates' );
 require_once 'helpers.php';
 require_once 'autoloader.php';
 
-$user_repository = new \Repositories\UserRepository();
+$usersData = [
+    [
+        'name' => 'Ivan',
+        'email' => 'ivan@test.com',
+        'device_id' => 'Ks[dqweer4'
+    ],
+    [
+        'name' => 'Peter',
+        'email' => 'peter@test.com'
+    ],
+    [
+        'name' => 'Mark',
+        'device_id' => 'Ks[dqweer4'
+    ],
+    [
+        'name' => 'Nina',
+        'email' => '...'
+    ],
+    [
+        'name' => 'Luke',
+        'device_id' => 'vfehlfg43g'
+    ],
+    [
+        'name' => 'Zerg',
+        'device_id' => ''
+    ],
+    [
+        'email' => '...',
+        'device_id' => ''
+    ]
+];
 
-$command = new \Commands\SendUserNotification($user_repository);
+$command = new \Commands\SendUserNotification($usersData);
 $command->process();
