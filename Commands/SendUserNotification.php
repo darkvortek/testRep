@@ -8,10 +8,6 @@ use Dto\UserDto;
 use Interfaces\LoggerInterface;
 use Interfaces\NotificationManagerInterface;
 use Interfaces\ValidatorInterface;
-use Notifications\EmailNotification;
-use Notifications\PushNotification;
-use Repositories\UserRepository;
-use Validators\BaseValidator;
 
 class SendUserNotification
 {
@@ -20,7 +16,7 @@ class SendUserNotification
 
     protected array $alreadySentEmail = [];
 
-    protected UserRepository $userRepository;
+    protected array $usersData;
 
     protected ValidatorInterface $validator;
 
@@ -28,9 +24,9 @@ class SendUserNotification
 
     protected NotificationManagerInterface $manager;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(array $usersData)
     {
-        $this->userRepository = $userRepository;
+        $this->usersData = $usersData;
         $this->validator = provider()->get(ValidatorInterface::class);
         $this->logger = provider()->get(LoggerInterface::class);
         $this->manager = provider()->get(NotificationManagerInterface::class);
@@ -38,9 +34,7 @@ class SendUserNotification
 
     public function process(): void
     {
-        $users = $this->userRepository->getUsers();
-
-        foreach ($users as $userData) {
+        foreach ($this->usersData as $userData) {
             $name = $userData['name'] ?? '';
             $email = $userData['email'] ?? '';
             $device_id = $userData['device_id'] ?? '';
@@ -66,15 +60,14 @@ class SendUserNotification
         $pushDto = new PushDto(
             'local',
             $userData->device_id,
-            $userData,
             get_template('push/UserNotification.phtml')
         );
 
         if ($this->manager->toPush($pushDto)->send()) {
             $this->logger->write(sprintf(
-                "Email %s has been sent to user %s\n\r",
-                $userData->email,
-                $userData->name
+                "Push notification has been sent to user %s with device_id %s\n\r",
+                $userData->name,
+                $userData->device_id
             ));
 
             $this->alreadySentPush[] = $userData->device_id;
@@ -86,15 +79,14 @@ class SendUserNotification
         $emailDto = new EmailDto(
             'local@local.com',
             $userData->email,
-            $userData,
             get_template('email/UserNotification.phtml', ['email' => $userData->email])
         );
 
         if ($this->manager->toEmail($emailDto)->send()) {
             $this->logger->write(sprintf(
-                "Push notification has been sent to user %s with device_id %s\n\r",
-                $userData->name,
-                $userData->device_id
+                "Email %s has been sent to user %s\n\r",
+                $userData->email,
+                $userData->name
             ));
 
             $this->alreadySentEmail[] = $userData->email;
