@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+    test-php-fpm:
+        build:
+            args:
+                user: test
+                uid: 1000
+            context: ./sources/php-fpm
+            dockerfile: Dockerfile
+        container_name: test-php-fpm
+        volumes:
+            - ../:/home/test
+        tty: true
