@@ -10,12 +10,12 @@ use App\Message\Message;
 use App\Sender\EmailSender;
 use App\Sender\NotificationSender;
 
-class NotificationStrategy
+class NotificationContext
 {
 
     private NotificationFactory $factory;
 
-    public function setStrategy(NotificationFactory $factory): NotificationStrategy
+    public function setStrategy(NotificationFactory $factory): NotificationContext
     {
         $this->factory = $factory;
 

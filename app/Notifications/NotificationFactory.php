@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Dto\UserNotificationDto;
 use App\Message\Message;
 use App\Sender\NotificationSender;
 
